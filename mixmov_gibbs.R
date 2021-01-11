@@ -26,6 +26,7 @@ mixture_movement=function(dat,alpha,ngibbs,nmaxclust,nburn){
   store.theta=matrix(NA,ngibbs,nmaxclust)
   store.loglikel=rep(NA,ngibbs)
   store.gamma1=rep(NA,ngibbs)
+  store.z=matrix(0,nobs,nmaxclust)
   
   #run gibbs sampler
   max.llk=-Inf
@@ -66,6 +67,10 @@ mixture_movement=function(dat,alpha,ngibbs,nmaxclust,nburn){
     store.loglikel[i]=llk
     store.gamma1[i]=gamma1
     
+    if (i> nburn){
+      store.z=StoreZ(z=z-1,store_z=store.z,nobs=nobs)
+    }
+    
     #re-order clusters
     if (i < nburn & i%%50==0){
       ordem=order(theta,decreasing=T)
@@ -86,11 +91,12 @@ mixture_movement=function(dat,alpha,ngibbs,nmaxclust,nburn){
   }
 
   if (i > nburn & llk>max.llk){
-    z.max.llk=z
+    z.MAP=z
     max.llk=llk
   }
   
   list(phi=store.phi,theta=store.theta,
-       loglikel=store.loglikel,z=z.max.llk,
+       loglikel=store.loglikel,z.MAP=z.MAP,
+       z.posterior=store.z,
        gamma1=store.gamma1)  
 }
